@@ -9,8 +9,8 @@ const resolve = (inputPath) => path.resolve(import.meta.dirname, inputPath);
 
 const getUsernameModule = resolve("get-username.proc.js");
 
-const commandsModules = Object.keys(commands).reduce((acc, c) => {
-    acc[c] = resolve(`${c}.js`);
+const commandsModules = Object.keys(commands).reduce((acc, command) => {
+    acc[command] = resolve(`${command}.js`);
     return acc;
 }, {});
 
@@ -81,16 +81,10 @@ export class FileManager {
         console.log(`Welcome to the File Manager, ${this.username}!`);
     }
 
-    async handleCommands() {}
-
     bye() {
         console.log(
             `Thank you for using File Manager, ${this.username}, goodbye!`
         );
-    }
-
-    async printStatus() {
-        console.log(`You are currently in ${this.directory}`);
     }
 
     async executor(what, args = process.argv.slice(2)) {
