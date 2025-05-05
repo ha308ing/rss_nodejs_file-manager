@@ -1,22 +1,34 @@
 import { readdir, lstat } from "node:fs/promises";
-import { resolve } from "node:path";
+import { EXIT_CODES } from "../consts.js";
 
-const args = process.argv.slice(2);
-if (args.length > 1) throw new TypeError("Maximum number of parameters is 1");
+const path = process.cwd();
 
-const pathInput = args[0] ?? process.cwd();
-const path = resolve(pathInput);
+try {
+    const stat = await lstat(path);
 
-const stat = await lstat(path);
-if (!stat.isDirectory()) throw new TypeError("Input path must be a directory");
+    if (!stat.isDirectory()) {
+        process.exit(EXIT_CODES.INVALID_INPUT.CODE);
+    }
 
-export const ls = async () => {
+    await ls();
+
+    process.exit(EXIT_CODES.SUCCESS.CODE);
+} catch {
+    process.exit(EXIT_CODES.OPERATION_FAILED.CODE);
+}
+
+export async function ls() {
     const list = await readdir(path, { withFileTypes: true });
     const table = list.map(formatItem).sort(sortItems);
-    console.log(`Content of ${path}:`);
-    console.table(table);
+
+    if (table.length === 0) {
+        console.log(`Directory is empty`);
+    } else {
+        console.log(`Content of ${path}:`);
+        console.table(table);
+    }
     return;
-};
+}
 
 function sortItems(a, b) {
     if (a.Type == b.Type) {
@@ -52,5 +64,3 @@ function getType(item) {
         ? "socket"
         : "unknown";
 }
-
-ls();
